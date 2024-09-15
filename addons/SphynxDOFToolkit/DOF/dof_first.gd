@@ -71,10 +71,10 @@ func _render_callback_2(render_size : Vector2i, render_scene_buffers : RenderSce
 	ensure_texture(custom_depth, render_scene_buffers, RenderingDevice.DATA_FORMAT_R32_SFLOAT)
 	ensure_texture(output_color, render_scene_buffers)
 	
-	rd.draw_command_begin_label("Motion Blur", Color(1.0, 1.0, 1.0, 1.0))
+	rd.draw_command_begin_label("Depth Of Field", Color(1.0, 1.0, 1.0, 1.0))
 	
 	var tile_max_x_push_constants: PackedFloat32Array = [
-		0,
+		focal_distance,
 		0,
 		0,
 		0
@@ -89,7 +89,7 @@ func _render_callback_2(render_size : Vector2i, render_scene_buffers : RenderSce
 	tile_max_x_push_constants_byte_array.append_array(int_tile_max_x_push_constants.to_byte_array())
 	
 	var tile_max_y_push_constants: PackedFloat32Array = [
-		0,
+		focal_distance,
 		0,
 		0,
 		0
@@ -104,7 +104,7 @@ func _render_callback_2(render_size : Vector2i, render_scene_buffers : RenderSce
 	tile_max_y_push_constants_byte_array.append_array(int_tile_max_y_push_constants.to_byte_array())
 	
 	var neighbor_max_push_constants: PackedFloat32Array = [
-		0,
+		focal_distance,
 		0,
 		0,
 		0
@@ -119,10 +119,10 @@ func _render_callback_2(render_size : Vector2i, render_scene_buffers : RenderSce
 	neighbor_max_push_constants_byte_array.append_array(int_neighbor_max_push_constants.to_byte_array())
 	
 	var blur_push_constants: PackedFloat32Array = [
-		minimum_user_threshold, 
-		importance_bias,
+		focal_distance, 
+		focal_amount,
 		maximum_jitter_value, 
-		temp_intensity,
+		max_focal_amount,
 	]
 	var int_blur_push_constants : PackedInt32Array = [
 		tile_size,
@@ -192,7 +192,7 @@ func _render_callback_2(render_size : Vector2i, render_scene_buffers : RenderSce
 		],
 		blur_push_constants_byte_array,
 		Vector3i(x_groups, y_groups, 1), 
-		"Blur", 
+		"DOF", 
 		view)
 		
 		dispatch_stage(overlay_stage, 

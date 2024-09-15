@@ -8,53 +8,17 @@ class_name DofPreProcessor
 		pre_blur_processor_stage = value
 		subscirbe_shader_stage(value)
 
-@export_group("Blur Components")
-@export var camera_rotation_component : BlurVelocityComponentResource = preload("res://addons/SphynxMotionBlurToolkit/PreBlurProcessing/default_camera_rotation_component.tres")
-@export var camera_movement_component : BlurVelocityComponentResource = preload("res://addons/SphynxMotionBlurToolkit/PreBlurProcessing/default_camera_movement_component.tres")
-@export var object_movement_component : BlurVelocityComponentResource = preload("res://addons/SphynxMotionBlurToolkit/PreBlurProcessing/default_object_movement_component.tres")
-
-var custom_velocity : StringName = "custom_velocity"
-
 var custom_depth : StringName = "custom_depth"
 
-var temp_intensity : float
-
-var previous_time : float = 0
-
 func _render_callback_2(render_size : Vector2i, render_scene_buffers : RenderSceneBuffersRD, render_scene_data : RenderSceneDataRD):
-	var time : float = float(Time.get_ticks_msec()) / 1000
-	
-	var delta_time : float = time - previous_time
-	
-	previous_time = time
-	
-	temp_intensity = intensity
-	
-	if framerate_independent:
-		var capped_frame_time : float = 1 / target_constant_framerate
-		
-		if !uncapped_independence:
-			capped_frame_time = min(capped_frame_time, delta_time)
-		
-		temp_intensity = intensity * capped_frame_time / delta_time
-	
-	ensure_texture(custom_velocity, render_scene_buffers)
 	ensure_texture(custom_depth, render_scene_buffers, RenderingDevice.DATA_FORMAT_R32_SFLOAT)
 	
 	rd.draw_command_begin_label("Pre Blur Processing", Color(1.0, 1.0, 1.0, 1.0))
 	
 	var float_pre_blur_push_constants: PackedFloat32Array = [
-		camera_rotation_component.multiplier,
-		camera_movement_component.multiplier,
-		object_movement_component.multiplier,
-		camera_rotation_component.lower_threshold,
-		camera_movement_component.lower_threshold,
-		object_movement_component.lower_threshold,
-		camera_rotation_component.upper_threshold,
-		camera_movement_component.upper_threshold,
-		object_movement_component.upper_threshold,
-		1 if true else 0,
-		temp_intensity,
+		0,
+		0,
+		0,
 		0,
 	]
 	
@@ -68,8 +32,6 @@ func _render_callback_2(render_size : Vector2i, render_scene_buffers : RenderSce
 	
 	for view in range(view_count):
 		var depth_image := render_scene_buffers.get_depth_layer(view)
-		var velocity_image := render_scene_buffers.get_velocity_layer(view)
-		var custom_velocity_image := render_scene_buffers.get_texture_slice(context, custom_velocity, view, 0, 1, 1)
 		var custom_depth_image := render_scene_buffers.get_texture_slice(context, custom_depth, view, 0, 1, 1)
 		var scene_data_buffer : RID = render_scene_data.get_uniform_buffer()
 		var scene_data_buffer_uniform := RDUniform.new()
@@ -83,14 +45,12 @@ func _render_callback_2(render_size : Vector2i, render_scene_buffers : RenderSce
 		dispatch_stage(pre_blur_processor_stage, 
 		[
 			get_sampler_uniform(depth_image, 0, false),
-			get_sampler_uniform(velocity_image, 1, false),
-			get_image_uniform(custom_velocity_image, 2),
-			get_image_uniform(custom_depth_image, 3),
+			get_image_uniform(custom_depth_image, 1),
 			scene_data_buffer_uniform
 		],
 		byte_array,
 		Vector3i(x_groups, y_groups, 1), 
-		"Process Velocity Buffer", 
+		"Process Depth Buffer", 
 		view)
 	
 	rd.draw_command_end_label()

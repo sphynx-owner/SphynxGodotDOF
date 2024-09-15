@@ -10,3 +10,9 @@ extends "res://addons/SphynxDOFToolkit/dof_compositor_effect.gd"
 @export var maximum_jitter_value : float = 0.95
 
 @export var minimum_user_threshold : float = 1.5
+
+@export var focal_distance : float = 10
+
+@export var focal_amount : float = 1
+
+@export var max_focal_amount : float = 20

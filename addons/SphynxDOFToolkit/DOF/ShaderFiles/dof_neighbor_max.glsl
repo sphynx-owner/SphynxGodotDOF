@@ -9,7 +9,7 @@ layout(r32f, set = 0, binding = 1) uniform writeonly image2D neighbor_max;
 
 layout(push_constant, std430) uniform Params 
 {	
-	float nan5;
+	float focal_distance;
 	float nan6;
 	float nan7;
 	float nan8;
@@ -33,6 +33,8 @@ void main()
 
 	vec2 uvn = (vec2(uvi) + vec2(0.5)) / render_size;
 
+	float max_focal_distance = 0;
+
 	float max_depth = 0;
 
 	for(int i = -1; i < 2; i++)
@@ -41,17 +43,13 @@ void main()
 		{
 			vec2 current_offset = vec2(1) / vec2(render_size) * vec2(i, j);
 			vec2 current_uv = uvn + current_offset;
-			if(current_uv.x < 0 || current_uv.x > 1 || current_uv.y < 0 || current_uv.y > 1)
-			{
-				continue;
-			}
-
-			bool is_diagonal = (abs(i) + abs(j) == 2);
 
 			float depth_sample = textureLod(tile_max, current_uv, 0.0).x;
-
-			if(depth_sample > max_depth)
+			float focal_distance = abs(depth_sample - params.focal_distance);
+			
+			if(focal_distance > max_focal_distance)
 			{
+				max_focal_distance = focal_distance;
 				max_depth = depth_sample;
 			}
 		}

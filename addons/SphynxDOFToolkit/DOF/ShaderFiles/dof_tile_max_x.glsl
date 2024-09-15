@@ -9,7 +9,7 @@ layout(r32f, set = 0, binding = 1) uniform writeonly image2D tile_max_x;
 
 layout(push_constant, std430) uniform Params 
 {	
-	float nan5;
+	float focal_distance;
 	float nan6;
 	float nan7;
 	float nan8;
@@ -35,14 +35,20 @@ void main()
 
 	vec2 uvn = (vec2(global_uvi) + vec2(0.5)) / render_size;
 
+	float max_focal_distance = 0;
+
 	float max_depth = 0;
 
 	for(int i = 0; i < params.tile_size; i++)
 	{
 		vec2 current_uv = uvn + vec2(float(i) / render_size.x, 0);
+		
 		float depth_sample = textureLod(depth_sampler, current_uv, 0.0).x;
-		if(depth_sample > max_depth)
+		float focal_distance = abs(depth_sample - params.focal_distance);
+		
+		if(focal_distance > max_focal_distance)
 		{
+			max_focal_distance = focal_distance;
 			max_depth = depth_sample;
 		}
 	}

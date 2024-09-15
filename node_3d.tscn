@@ -1,10 +1,7 @@
-[gd_scene load_steps=26 format=3 uid="uid://dvqxugrx6ssst"]
+[gd_scene load_steps=23 format=3 uid="uid://dvqxugrx6ssst"]
 
 [ext_resource type="Texture2D" uid="uid://b3t1wv02oa2h" path="res://icon.svg" id="1_l4mhd"]
-[ext_resource type="Resource" uid="uid://cslvcweyejh3c" path="res://addons/SphynxMotionBlurToolkit/PreBlurProcessing/default_camera_movement_component.tres" id="2_ysg4k"]
-[ext_resource type="Resource" uid="uid://iru8ynu04i00" path="res://addons/SphynxMotionBlurToolkit/PreBlurProcessing/default_camera_rotation_component.tres" id="3_c6qvt"]
 [ext_resource type="Script" path="res://addons/SphynxEnhancedCompositorToolkit/Debug/post_process_debug.gd" id="3_ggi6m"]
-[ext_resource type="Resource" uid="uid://rp3mpjmisoyh" path="res://addons/SphynxMotionBlurToolkit/PreBlurProcessing/default_object_movement_component.tres" id="4_4ewne"]
 [ext_resource type="Resource" uid="uid://dwamd4hl7fi5t" path="res://addons/SphynxDOFToolkit/DOFPreProcessor/dof_pre_processor_stage.tres" id="5_b2l2e"]
 [ext_resource type="Script" path="res://addons/SphynxDOFToolkit/DOFPreProcessor/dof_pre_processor.gd" id="6_dobmu"]
 [ext_resource type="Resource" uid="uid://dw0r1gbmf1hrb" path="res://addons/SphynxEnhancedCompositorToolkit/Debug/debug_overlay_shader_stage.tres" id="7_6mwvp"]
@@ -17,7 +14,7 @@
 [ext_resource type="Resource" uid="uid://p24gn7jgs2oo" path="res://addons/SphynxDOFToolkit/DOF/dof_tile_max_y_stage.tres" id="12_cwrjx"]
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_uqbpi"]
-size = Vector2(10, 10)
+size = Vector2(100, 100)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_aj01m"]
 albedo_texture = ExtResource("1_l4mhd")
@@ -39,14 +36,11 @@ resource_local_to_scene = false
 resource_name = ""
 enabled = true
 effect_callback_type = 4
-needs_motion_vectors = true
+needs_motion_vectors = false
 needs_normal_roughness = false
 script = ExtResource("6_dobmu")
 pre_blur_processor_stage = ExtResource("5_b2l2e")
-camera_rotation_component = ExtResource("3_c6qvt")
-camera_movement_component = ExtResource("2_ysg4k")
-object_movement_component = ExtResource("4_4ewne")
-debug = true
+debug = false
 
 [sub_resource type="CompositorEffect" id="CompositorEffect_7i2rg"]
 resource_local_to_scene = false
@@ -66,7 +60,10 @@ linear_falloff_slope = 1.0
 importance_bias = 40.0
 maximum_jitter_value = 0.95
 minimum_user_threshold = 1.5
-debug = true
+focal_distance = 10.0
+focal_amount = 2.0
+max_focal_amount = 20.0
+debug = false
 
 [sub_resource type="CompositorEffect" id="CompositorEffect_bt7dm"]
 resource_local_to_scene = false
@@ -103,7 +100,43 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.104394, 0.502879, 2.96147)
 mesh = SubResource("SphereMesh_a01ts")
 
 [node name="MeshInstance3D5" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.40359, 0.502879, 3.16389)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.5214, 0.502879, 3.63171)
+mesh = SubResource("SphereMesh_a01ts")
+
+[node name="MeshInstance3D9" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.55231, 0.502879, -1.83072)
+mesh = SubResource("SphereMesh_a01ts")
+
+[node name="MeshInstance3D10" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.05872, 0.502879, -6.96694)
+mesh = SubResource("SphereMesh_a01ts")
+
+[node name="MeshInstance3D11" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.91163, 0.502879, -10.9661)
+mesh = SubResource("SphereMesh_a01ts")
+
+[node name="MeshInstance3D12" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.26138, 0.502879, -15.6672)
+mesh = SubResource("SphereMesh_a01ts")
+
+[node name="MeshInstance3D13" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.26138, 0.502879, -4.4137)
+mesh = SubResource("SphereMesh_a01ts")
+
+[node name="MeshInstance3D14" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.56766, 0.502879, -0.846442)
+mesh = SubResource("SphereMesh_a01ts")
+
+[node name="MeshInstance3D15" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.63037, 0.502879, 6.40046)
+mesh = SubResource("SphereMesh_a01ts")
+
+[node name="MeshInstance3D16" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.95761, 0.502879, 6.62607)
+mesh = SubResource("SphereMesh_a01ts")
+
+[node name="MeshInstance3D17" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.05534, 0.502879, 11.6289)
 mesh = SubResource("SphereMesh_a01ts")
 
 [node name="MeshInstance3D6" type="MeshInstance3D" parent="."]

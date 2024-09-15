@@ -22,7 +22,7 @@ func _input(event: InputEvent) -> void:
 func _process(delta: float) -> void:
 	var movement : Vector2 = Input.get_vector("A", "D", "W", "S")
 	var elevation : float = Input.get_vector("Q", "E", "Q", "E").x
-	global_position += global_basis * Vector3(movement.x, elevation, movement.y) * delta * 20;
+	global_position += global_basis * Vector3(movement.x, elevation, movement.y) * delta * 5;
 	
 	if to_look_at:
 		look_at($"../../MeshInstance3D5".global_position)

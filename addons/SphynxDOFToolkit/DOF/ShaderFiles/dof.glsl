@@ -13,10 +13,10 @@ layout(rgba16f, set = 0, binding = 3) uniform writeonly image2D output_color;
 
 layout(push_constant, std430) uniform Params 
 {	
-	float minimum_user_threshold;
-	float importance_bias;
+	float focal_distance;
+	float focal_amount;
 	float maximum_jitter_value;
-	float motion_blur_intensity;
+	float max_focal_amount;
 	int tile_size;
 	int sample_count;
 	int frame;
@@ -25,16 +25,18 @@ layout(push_constant, std430) uniform Params
 
 layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
 
-const int kernel_side = 7;
+const int kernel_side = 9;
 
 const float kernel[] = {
-0.0000,	0.0000,	0.0002,	0.0004,	0.0002,	0.0000,	0.0000,
-0.0000,	0.0009,	0.0070,	0.0138,	0.0070,	0.0009,	0.0000,
-0.0002,	0.0070,	0.0555,	0.1103,	0.0555,	0.0070,	0.0002,
-0.0004,	0.0138,	0.1103,	0.2191,	0.1103,	0.0138,	0.0004,
-0.0002,	0.0070,	0.0555,	0.1103,	0.0555,	0.0070,	0.0002,
-0.0000,	0.0009,	0.0070,	0.0138,	0.0070,	0.0009,	0.0000,
-0.0000,	0.0000,	0.0002,	0.0004,	0.0002,	0.0000,	0.0000,
+0.0000,	0.0000,	0.0000,	0.0001,	0.0001,	0.0001,	0.0000,	0.0000,	0.0000,
+0.0000,	0.0000,	0.0004,	0.0014,	0.0023,	0.0014,	0.0004,	0.0000,	0.0000,
+0.0000,	0.0004,	0.0037,	0.0146,	0.0232,	0.0146,	0.0037,	0.0004,	0.0000,
+0.0001,	0.0014,	0.0146,	0.0584,	0.0926,	0.0584,	0.0146,	0.0014,	0.0001,
+0.0001,	0.0023,	0.0232,	0.0926,	0.1466,	0.0926,	0.0232,	0.0023,	0.0001,
+0.0001,	0.0014,	0.0146,	0.0584,	0.0926,	0.0584,	0.0146,	0.0014,	0.0001,
+0.0000,	0.0004,	0.0037,	0.0146,	0.0232,	0.0146,	0.0037,	0.0004,	0.0000,
+0.0000,	0.0000,	0.0004,	0.0014,	0.0023,	0.0014,	0.0004,	0.0000,	0.0000,
+0.0000,	0.0000,	0.0000,	0.0001,	0.0001,	0.0001,	0.0000,	0.0000,	0.0000
 };
 
 // Guertin's functions https://research.nvidia.com/sites/default/files/pubs/2013-11_A-Fast-and/Guertin2013MotionBlur-small.pdf
@@ -81,25 +83,17 @@ void main()
 
 	vec2 x = (vec2(uvi) + vec2(0.5)) / vec2(render_size);
 
-	float dn =  textureLod(neighbor_max, x + vec2(params.tile_size / 2) / vec2(render_size) + jitter_tile(uvi), 0.0).x * params.motion_blur_intensity;
+	float n =  textureLod(neighbor_max, x + vec2(params.tile_size / 2) / vec2(render_size) + jitter_tile(uvi), 0.0).x;
+
+	float dn = min(params.max_focal_amount, abs(n - params.focal_distance) * params.focal_amount);
 
 	vec4 base_color = textureLod(color_sampler, x, 0.0);
 
-	float dx = textureLod(depth_sampler, x, 0.0).x * params.motion_blur_intensity;
+	float d = textureLod(depth_sampler, x, 0.0).x;
 
-	if(vn_length < 0.5)
-	{
-		imageStore(output_color, uvi, base_color);
-#ifdef DEBUG
-		imageStore(debug_1_image, uvi, base_color);
-		imageStore(debug_2_image, uvi, vec4(vn / render_size * 2, 0, 1));
-		imageStore(debug_3_image, uvi, vec4(vxzw.xy / render_size * 2, 0, 1));
-		imageStore(debug_4_image, uvi, vec4(0));
-#endif
-		return;
-	}
+	float dx = min(params.max_focal_amount, abs(d - params.focal_distance) * params.focal_amount);
 	
-	float j = interleaved_gradient_noise(uvi) * 2. - 1.;
+	//float j = interleaved_gradient_noise(uvi) * 2. - 1.;
 
 	float weight = 1e-6;
 
@@ -111,61 +105,56 @@ void main()
 
 	for(int i = 0; i < kernel_side; i++)
 	{
-		for(int j = 0; j < kernel_size; j++)
+		for(int j = 0; j < kernel_side; j++)
 		{
-			vec2 sample_offset = (vec2(i, j) - vec2(i, j) / 2.0) / vec2(render_size) / float(kernel_size) * 2.0;
-		
-			vec2 sn = x + sample_offset * dn;
+			vec2 sample_offset = (vec2(i, j) - vec2(kernel_side) / 2.0 + vec2(0.5)) / (vec2(kernel_side) / 2.0 - vec2(0.5));
+			
+			float sample_offset_length = length(sample_offset);
 
-			vec2 sx = x + sample_offset * dx;
+			vec2 sn = x + sample_offset / vec2(render_size)  * dn;
+				
+			float wsn = sample_offset_length * dn;
+			
+			float yn = textureLod(depth_sampler, sn, 0.0).x;
 
-			vec2 yn = textureLod(depth_sampler, sn, 0.0).x * params.motion_blur_intensity;
+			float dyn = min(params.max_focal_amount, abs(yn - params.focal_distance) * params.focal_amount);
 
-			vec2 yx = textureLod(depth_sampler, sx, 0.0).x * params.motion_blur_intensity;
-		
-			vec4 vyzw = textureLod(velocity_sampler, y, 0.0) * vec4(render_size / 2, 1, 1) * params.motion_blur_intensity;
-		
-			vec2 vy = vyzw.xy - dz * t; 
-	
-			float vy_length = max(0.5, length(vy));
+			vec2 sx = x + sample_offset / vec2(render_size) * dx;
 
-			float zy = vyzw.w;
+			//float wsx = sample_offset_length * dx;
 
-			float f = z_compare(-zy, -zx, 20000);
-			float b = z_compare(-zx, -zy, 20000);
+			float dy = textureLod(depth_sampler, sx, 0.0).x;
 
-			float wb = abs(dot(vy / vy_length, wd));
-		
-			if(use_vn)
-			{
-				float ay = f * step(T, vy_length * wb);
+			//float dyx = min(params.max_focal_amount, abs(dy - params.focal_distance) * params.focal_amount);
 
-				weight += ay; 
+			float sn_inside = (sn.x < 0 || sn.x > 1 || sn.y < 0 || sn.y > 1) ? 0 : 1;
 
-				sum += textureLod(color_sampler, y, 0.0) * ay;
-			}
+			float sx_inside = (sx.x < 0 || sx.x > 1 || sx.y < 0 || sx.y > 1) ? 0 : 1;
 
-			float nai_ay = b * step(T, vx_length * wa) * 2;
+			float ay = sn_inside * step(wsn / 2, dyn) * step(yn, d);
+			weight += ay;
+			sum += textureLod(color_sampler, sn, 0.0) * ay;
 
+			float nai_ay = sx_inside * step(d, dy);
 			nai_weight += nai_ay;
-
-			nai_sum += textureLod(color_sampler, y, 0.0) * nai_ay;
+			nai_sum += textureLod(color_sampler, sx, 0.0) * nai_ay;
 		}
 	}
 
 	sum /= weight;
 
-	weight /= params.sample_count / 2;
+	weight /= kernel_side * kernel_side;
 
 	nai_sum /= nai_weight;
 
 	sum = mix(nai_sum, sum, weight);
+	
+	//sum /= weight;
 
 	imageStore(output_color, uvi, sum);
 #ifdef DEBUG
 	imageStore(debug_1_image, uvi, base_color);
-	imageStore(debug_2_image, uvi, vec4(vn / render_size * 2, 0, 1));
-	imageStore(debug_3_image, uvi, vec4(vx / render_size * 2, 0, 1));
-	imageStore(debug_4_image, uvi, vxzw);
+	imageStore(debug_2_image, uvi, vec4(dn));
+	imageStore(debug_3_image, uvi, vec4(dx));
 #endif
 }

@@ -5,9 +5,7 @@
 #define FLT_MIN 1.175494351e-38
 
 layout(set = 0, binding = 0) uniform sampler2D depth_sampler;
-layout(set = 0, binding = 1) uniform sampler2D vector_sampler;
-layout(rgba32f, set = 0, binding = 2) uniform writeonly image2D vector_output;
-layout(r32f, set = 0, binding = 3) uniform writeonly image2D depth_output;
+layout(r32f, set = 0, binding = 1) uniform writeonly image2D depth_output;
 
 struct SceneData {
 	highp mat4 projection_matrix;
@@ -90,18 +88,10 @@ scene;
 
 layout(push_constant, std430) uniform Params 
 {
-	float rotation_velocity_multiplier;
-	float movement_velocity_multiplier;
-	float object_velocity_multiplier;
-	float rotation_velocity_lower_threshold;
-	float movement_velocity_lower_threshold;
-	float object_velocity_lower_threshold;
-	float rotation_velocity_upper_threshold;
-	float movement_velocity_upper_threshold;
-	float object_velocity_upper_threshold;
-	float is_fsr2;
-	float motion_blur_intensity;
-	float nan_fl_2;
+	float nan1;
+	float nan2;
+	float nan3;
+	float nan4;
 } params;
 
 layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
@@ -118,7 +108,7 @@ float get_view_depth(float depth)
 
 void main() 
 {
-	ivec2 render_size = ivec2(textureSize(vector_sampler, 0));
+	ivec2 render_size = ivec2(textureSize(depth_sampler, 0));
 	ivec2 uvi = ivec2(gl_GlobalInvocationID.xy);
 	if ((uvi.x >= render_size.x) || (uvi.y >= render_size.y)) 
 	{
@@ -139,75 +129,9 @@ void main()
 
 	float true_depth = -view_position.z;
 
-	float focal_depth = abs(true_depth - 10);
-	// get full change 
-	vec4 world_local_position = inverse(scene_data.view_matrix) * vec4(view_position.xyz, 1.0);
-
-	vec4 view_past_position = mat4(previous_scene_data.view_matrix) * vec4(world_local_position.xyz, 1.0);
-	
-	vec4 view_past_ndc = previous_scene_data.projection_matrix * view_past_position;
-
-	view_past_ndc.xyz /= view_past_ndc.w;
-
-	vec3 past_uv = vec3(view_past_ndc.xy * 0.5 + 0.5, view_past_ndc.z);
-
-	vec4 view_past_ndc_cache = view_past_ndc;
-
-	vec3 camera_uv_change = past_uv - vec3(uvn, depth);
-
-	// get just rotation change
-	world_local_position = mat4(mat3(inverse(scene_data.view_matrix))) * vec4(view_position.xyz, 1.0);
-
-	view_past_position = mat4(mat3(previous_scene_data.view_matrix)) * vec4(world_local_position.xyz, 1.0);
-	
-	view_past_ndc = previous_scene_data.projection_matrix * view_past_position;
-
-	view_past_ndc.xyz /= view_past_ndc.w;
-
-	past_uv = vec3(view_past_ndc.xy * 0.5 + 0.5, view_past_ndc.z);
-
-	vec3 camera_rotation_uv_change = past_uv - vec3(uvn, depth);
-	// get just movement change
-	vec3 camera_movement_uv_change = camera_uv_change - camera_rotation_uv_change;
-	// fill in gaps in base velocity (skybox, z velocity)
-	vec3 base_velocity = vec3(textureLod(vector_sampler, uvn, 0.0).xy + mix(vec2(0), camera_uv_change.xy, step(depth, 0.)), camera_uv_change.z);
-	// fsr just makes it so values are larger than 1, I assume its the only case when it happens
-	if(params.is_fsr2 > 0.5 && dot(base_velocity.xy, base_velocity.xy) >= 1)
-	{
-		base_velocity = camera_uv_change;
-	}
-	// get object velocity
-	vec3 object_uv_change = base_velocity - camera_uv_change.xyz;
-	// construct final velocity with user defined weights
-	vec3 total_velocity = camera_rotation_uv_change * params.rotation_velocity_multiplier * sharp_step(params.rotation_velocity_lower_threshold, params.rotation_velocity_upper_threshold, length(camera_rotation_uv_change) * params.rotation_velocity_multiplier * params.motion_blur_intensity)
-	+ camera_movement_uv_change * params.movement_velocity_multiplier * sharp_step(params.movement_velocity_lower_threshold, params.movement_velocity_upper_threshold, length(camera_movement_uv_change) * params.movement_velocity_multiplier * params.motion_blur_intensity)
-	+ object_uv_change * params.object_velocity_multiplier * sharp_step(params.object_velocity_lower_threshold, params.object_velocity_upper_threshold, length(object_uv_change) * params.object_velocity_multiplier * params.motion_blur_intensity);
-	// if objects move, clear z direction, (z only correct for static environment)
-	if(dot(object_uv_change.xy, object_uv_change.xy) > 0.000001)
-	{
-		total_velocity.z = 0;
-		base_velocity.z = 0;
-	}
-	// choose the smaller option out of the two based on amgnitude, seems to work well
-	if(dot(total_velocity.xy * 99, total_velocity.xy * 100) >= dot(base_velocity.xy * 100, base_velocity.xy * 100))
-	{
-		total_velocity = base_velocity;
-	}
-
-	float total_velocity_length = max(FLT_MIN, length(total_velocity));
-	total_velocity = total_velocity * clamp(total_velocity_length, 0, 1) / total_velocity_length;
-
-	imageStore(vector_output, uvi, vec4(total_velocity * (view_past_ndc_cache.w < 0 ? -1 : 1), depth));//, depth));//
-
-	imageStore(depth_output, uvi, vec4(focal_depth));
+	imageStore(depth_output, uvi, vec4(true_depth));
 
 #ifdef DEBUG
-	vec2 velocity = textureLod(vector_sampler, uvn, 0.0).xy;
-	float velocity_length = length(velocity);
-	velocity = velocity * clamp(velocity_length, 0, 10) / velocity_length;
 	imageStore(debug_5_image, uvi, vec4(true_depth / 10));
-	imageStore(debug_6_image, uvi, vec4(velocity * (view_past_ndc_cache.w < 0 ? -1 : 1), view_past_ndc_cache.w < 0 ? 1 : 0, 1));
-	imageStore(debug_7_image, uvi, vec4(camera_uv_change.xy, 0, 1));
-	imageStore(debug_8_image, uvi, vec4(focal_depth / 10));
 #endif
 }
