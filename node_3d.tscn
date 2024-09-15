@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://dvqxugrx6ssst"]
+[gd_scene load_steps=26 format=3 uid="uid://dvqxugrx6ssst"]
 
 [ext_resource type="Texture2D" uid="uid://b3t1wv02oa2h" path="res://icon.svg" id="1_l4mhd"]
 [ext_resource type="Resource" uid="uid://cslvcweyejh3c" path="res://addons/SphynxMotionBlurToolkit/PreBlurProcessing/default_camera_movement_component.tres" id="2_ysg4k"]
@@ -8,7 +8,13 @@
 [ext_resource type="Resource" uid="uid://dwamd4hl7fi5t" path="res://addons/SphynxDOFToolkit/DOFPreProcessor/dof_pre_processor_stage.tres" id="5_b2l2e"]
 [ext_resource type="Script" path="res://addons/SphynxDOFToolkit/DOFPreProcessor/dof_pre_processor.gd" id="6_dobmu"]
 [ext_resource type="Resource" uid="uid://dw0r1gbmf1hrb" path="res://addons/SphynxEnhancedCompositorToolkit/Debug/debug_overlay_shader_stage.tres" id="7_6mwvp"]
+[ext_resource type="Resource" uid="uid://mn0cw0048jg2" path="res://addons/SphynxDOFToolkit/DOF/dof_stage.tres" id="7_881wi"]
+[ext_resource type="Resource" uid="uid://crcl25s18jv3g" path="res://addons/SphynxDOFToolkit/DOF/dof_neighbor_max_stage.tres" id="8_0fbme"]
 [ext_resource type="Script" path="res://camera_3d.gd" id="9_e4rl6"]
+[ext_resource type="Resource" uid="uid://dsckimrjft4ae" path="res://addons/SphynxDOFToolkit/DOF/dof_overlay_stage.tres" id="9_fytee"]
+[ext_resource type="Script" path="res://addons/SphynxDOFToolkit/DOF/dof_first.gd" id="10_cvyde"]
+[ext_resource type="Resource" uid="uid://bxt108v66ndrx" path="res://addons/SphynxDOFToolkit/DOF/dof_tile_max_x_stage.tres" id="11_br4o4"]
+[ext_resource type="Resource" uid="uid://p24gn7jgs2oo" path="res://addons/SphynxDOFToolkit/DOF/dof_tile_max_y_stage.tres" id="12_cwrjx"]
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_uqbpi"]
 size = Vector2(10, 10)
@@ -42,6 +48,26 @@ camera_movement_component = ExtResource("2_ysg4k")
 object_movement_component = ExtResource("4_4ewne")
 debug = true
 
+[sub_resource type="CompositorEffect" id="CompositorEffect_7i2rg"]
+resource_local_to_scene = false
+resource_name = ""
+enabled = true
+effect_callback_type = 4
+needs_motion_vectors = false
+needs_normal_roughness = false
+script = ExtResource("10_cvyde")
+dof_stage = ExtResource("7_881wi")
+overlay_stage = ExtResource("9_fytee")
+tile_max_x_stage = ExtResource("11_br4o4")
+tile_max_y_stage = ExtResource("12_cwrjx")
+neighbor_max_stage = ExtResource("8_0fbme")
+tile_size = 40
+linear_falloff_slope = 1.0
+importance_bias = 40.0
+maximum_jitter_value = 0.95
+minimum_user_threshold = 1.5
+debug = true
+
 [sub_resource type="CompositorEffect" id="CompositorEffect_bt7dm"]
 resource_local_to_scene = false
 resource_name = ""
@@ -56,7 +82,7 @@ debug_page = 0
 debug = false
 
 [sub_resource type="Compositor" id="Compositor_1neiv"]
-compositor_effects = Array[CompositorEffect]([SubResource("CompositorEffect_85kal"), SubResource("CompositorEffect_bt7dm")])
+compositor_effects = Array[CompositorEffect]([SubResource("CompositorEffect_85kal"), SubResource("CompositorEffect_7i2rg"), SubResource("CompositorEffect_bt7dm")])
 
 [node name="Node3D" type="Node3D"]
 
@@ -66,7 +92,6 @@ surface_material_override/0 = SubResource("StandardMaterial3D_aj01m")
 
 [node name="MeshInstance3D2" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.502879, 0)
-visible = false
 mesh = SubResource("SphereMesh_a01ts")
 
 [node name="MeshInstance3D3" type="MeshInstance3D" parent="."]

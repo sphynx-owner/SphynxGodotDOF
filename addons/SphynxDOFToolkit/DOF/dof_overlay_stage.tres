@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="ShaderStageResource" load_steps=3 format=3 uid="uid://dsckimrjft4ae"]
+
+[ext_resource type="Script" path="res://addons/SphynxEnhancedCompositorToolkit/BaseClasses/shader_pass_resource.gd" id="1_txobd"]
+[ext_resource type="RDShaderFile" uid="uid://bsiq82b8xg0a1" path="res://addons/SphynxDOFToolkit/DOF/ShaderFiles/dof_overlay.glsl" id="2_rm6l2"]
+
+[resource]
+script = ExtResource("1_txobd")
+shader_file = ExtResource("2_rm6l2")

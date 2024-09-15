@@ -1,0 +1,14 @@
+[remap]
+
+importer="glsl"
+type="RDShaderFile"
+uid="uid://bsiq82b8xg0a1"
+path="res://.godot/imported/dof_overlay.glsl-cd8ae1916004a5084d1ac3fc8a1c07ea.res"
+
+[deps]
+
+source_file="res://addons/SphynxDOFToolkit/DOF/ShaderFiles/dof_overlay.glsl"
+dest_files=["res://.godot/imported/dof_overlay.glsl-cd8ae1916004a5084d1ac3fc8a1c07ea.res"]
+
+[params]
+

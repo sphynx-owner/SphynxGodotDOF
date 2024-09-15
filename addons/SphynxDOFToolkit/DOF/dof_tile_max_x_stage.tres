@@ -1,6 +1,8 @@
-[gd_resource type="Resource" script_class="ShaderStageResource" load_steps=2 format=3 uid="uid://bxt108v66ndrx"]
+[gd_resource type="Resource" script_class="ShaderStageResource" load_steps=3 format=3 uid="uid://bxt108v66ndrx"]
 
-[ext_resource type="Script" path="res://addons/SphynxEnhancedCompositorToolkit/BaseClasses/shader_pass_resource.gd" id="1_frhc2"]
+[ext_resource type="Script" path="res://addons/SphynxEnhancedCompositorToolkit/BaseClasses/shader_pass_resource.gd" id="1_mjmu2"]
+[ext_resource type="RDShaderFile" uid="uid://dnjxsg5453hkf" path="res://addons/SphynxDOFToolkit/DOF/ShaderFiles/dof_tile_max_x.glsl" id="2_v2fq0"]
 
 [resource]
-script = ExtResource("1_frhc2")
+script = ExtResource("1_mjmu2")
+shader_file = ExtResource("2_v2fq0")
