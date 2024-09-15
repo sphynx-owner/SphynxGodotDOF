@@ -1,0 +1,14 @@
+[remap]
+
+importer="glsl"
+type="RDShaderFile"
+uid="uid://dnjxsg5453hkf"
+path="res://.godot/imported/dof_tile_max_x.glsl-6e03ab03385c59efca26d0ce1a6e0c4b.res"
+
+[deps]
+
+source_file="res://addons/SphynxDOFToolkit/DOF/ShaderFiles/dof_tile_max_x.glsl"
+dest_files=["res://.godot/imported/dof_tile_max_x.glsl-6e03ab03385c59efca26d0ce1a6e0c4b.res"]
+
+[params]
+

@@ -1,0 +1,14 @@
+[remap]
+
+importer="glsl"
+type="RDShaderFile"
+uid="uid://c11yd4dq8bbdv"
+path="res://.godot/imported/dof_pre_processor.glsl-03e12a22963e16fc96b44528e3e7e81e.res"
+
+[deps]
+
+source_file="res://addons/SphynxDOFToolkit/DOFPreProcessor/ShaderFiles/dof_pre_processor.glsl"
+dest_files=["res://.godot/imported/dof_pre_processor.glsl-03e12a22963e16fc96b44528e3e7e81e.res"]
+
+[params]
+

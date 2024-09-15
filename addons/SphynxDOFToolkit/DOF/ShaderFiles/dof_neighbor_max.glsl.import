@@ -1,0 +1,14 @@
+[remap]
+
+importer="glsl"
+type="RDShaderFile"
+uid="uid://b8palq4517bvt"
+path="res://.godot/imported/dof_neighbor_max.glsl-cbce277f423ffd0d567f69b5f964c315.res"
+
+[deps]
+
+source_file="res://addons/SphynxDOFToolkit/DOF/ShaderFiles/dof_neighbor_max.glsl"
+dest_files=["res://.godot/imported/dof_neighbor_max.glsl-cbce277f423ffd0d567f69b5f964c315.res"]
+
+[params]
+

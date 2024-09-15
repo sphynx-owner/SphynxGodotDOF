@@ -1,0 +1,105 @@
+[gd_scene load_steps=19 format=3 uid="uid://dvqxugrx6ssst"]
+
+[ext_resource type="Texture2D" uid="uid://b3t1wv02oa2h" path="res://icon.svg" id="1_l4mhd"]
+[ext_resource type="Resource" uid="uid://cslvcweyejh3c" path="res://addons/SphynxMotionBlurToolkit/PreBlurProcessing/default_camera_movement_component.tres" id="2_ysg4k"]
+[ext_resource type="Resource" uid="uid://iru8ynu04i00" path="res://addons/SphynxMotionBlurToolkit/PreBlurProcessing/default_camera_rotation_component.tres" id="3_c6qvt"]
+[ext_resource type="Script" path="res://addons/SphynxEnhancedCompositorToolkit/Debug/post_process_debug.gd" id="3_ggi6m"]
+[ext_resource type="Resource" uid="uid://rp3mpjmisoyh" path="res://addons/SphynxMotionBlurToolkit/PreBlurProcessing/default_object_movement_component.tres" id="4_4ewne"]
+[ext_resource type="Resource" uid="uid://dwamd4hl7fi5t" path="res://addons/SphynxDOFToolkit/DOFPreProcessor/dof_pre_processor_stage.tres" id="5_b2l2e"]
+[ext_resource type="Script" path="res://addons/SphynxDOFToolkit/DOFPreProcessor/dof_pre_processor.gd" id="6_dobmu"]
+[ext_resource type="Resource" uid="uid://dw0r1gbmf1hrb" path="res://addons/SphynxEnhancedCompositorToolkit/Debug/debug_overlay_shader_stage.tres" id="7_6mwvp"]
+[ext_resource type="Script" path="res://camera_3d.gd" id="9_e4rl6"]
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_uqbpi"]
+size = Vector2(10, 10)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_aj01m"]
+albedo_texture = ExtResource("1_l4mhd")
+uv1_scale = Vector3(10, 10, 10)
+
+[sub_resource type="SphereMesh" id="SphereMesh_a01ts"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_xeq8s"]
+
+[sub_resource type="Sky" id="Sky_vdoam"]
+sky_material = SubResource("ProceduralSkyMaterial_xeq8s")
+
+[sub_resource type="Environment" id="Environment_brhdr"]
+background_mode = 2
+sky = SubResource("Sky_vdoam")
+
+[sub_resource type="CompositorEffect" id="CompositorEffect_85kal"]
+resource_local_to_scene = false
+resource_name = ""
+enabled = true
+effect_callback_type = 4
+needs_motion_vectors = true
+needs_normal_roughness = false
+script = ExtResource("6_dobmu")
+pre_blur_processor_stage = ExtResource("5_b2l2e")
+camera_rotation_component = ExtResource("3_c6qvt")
+camera_movement_component = ExtResource("2_ysg4k")
+object_movement_component = ExtResource("4_4ewne")
+debug = true
+
+[sub_resource type="CompositorEffect" id="CompositorEffect_bt7dm"]
+resource_local_to_scene = false
+resource_name = ""
+enabled = true
+effect_callback_type = 4
+needs_motion_vectors = false
+needs_normal_roughness = false
+script = ExtResource("3_ggi6m")
+overlay_stage = ExtResource("7_6mwvp")
+draw_debug = false
+debug_page = 0
+debug = false
+
+[sub_resource type="Compositor" id="Compositor_1neiv"]
+compositor_effects = Array[CompositorEffect]([SubResource("CompositorEffect_85kal"), SubResource("CompositorEffect_bt7dm")])
+
+[node name="Node3D" type="Node3D"]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("PlaneMesh_uqbpi")
+surface_material_override/0 = SubResource("StandardMaterial3D_aj01m")
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.502879, 0)
+visible = false
+mesh = SubResource("SphereMesh_a01ts")
+
+[node name="MeshInstance3D3" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.63907, 0.502879, 0.524914)
+mesh = SubResource("SphereMesh_a01ts")
+
+[node name="MeshInstance3D4" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.104394, 0.502879, 2.96147)
+mesh = SubResource("SphereMesh_a01ts")
+
+[node name="MeshInstance3D5" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.40359, 0.502879, 3.16389)
+mesh = SubResource("SphereMesh_a01ts")
+
+[node name="MeshInstance3D6" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.81204, 0.502879, -2.25863)
+mesh = SubResource("SphereMesh_a01ts")
+
+[node name="MeshInstance3D7" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.03321, 0.502879, 2.40384)
+mesh = SubResource("SphereMesh_a01ts")
+
+[node name="MeshInstance3D8" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.03321, 0.502879, 2.40384)
+mesh = SubResource("SphereMesh_a01ts")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_brhdr")
+compositor = SubResource("Compositor_1neiv")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.579964, 0.814642, 0, -0.814642, 0.579964, 0, 0, 0)
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.3314, 7.48129)
+script = ExtResource("9_e4rl6")
