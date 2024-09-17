@@ -62,7 +62,7 @@ maximum_jitter_value = 0.95
 minimum_user_threshold = 1.5
 focal_distance = 10.0
 focal_amount = 2.0
-max_focal_amount = 30.0
+max_focal_amount = 10.0
 debug = true
 
 [sub_resource type="CompositorEffect" id="CompositorEffect_bt7dm"]
