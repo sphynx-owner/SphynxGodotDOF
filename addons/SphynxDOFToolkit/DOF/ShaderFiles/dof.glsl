@@ -43,7 +43,7 @@ const float kernel[] = {
 // ----------------------------------------------------------
 float z_compare(float a, float b, float sze)
 {
-	return clamp(1. - sze * (a - b), 0, 1);
+	return clamp(1. - sze * (a - b) / min(a, b), 0, 1);
 }
 // ----------------------------------------------------------
 
@@ -121,23 +121,27 @@ void main()
 
 			vec2 sx = x + sample_offset / vec2(render_size) * dx;
 
-			//float wsx = sample_offset_length * dx;
+			float wsx = sample_offset_length * dx;
 
 			float dy = textureLod(depth_sampler, sx, 0.0).x;
 
-			//float dyx = min(params.max_focal_amount, abs(dy - params.focal_distance) * params.focal_amount);
+			float dyx = min(params.max_focal_amount, abs(dy - params.focal_distance) * params.focal_amount);
 
 			float sn_inside = (sn.x < 0 || sn.x > 1 || sn.y < 0 || sn.y > 1) ? 0 : 1;
 
 			float sx_inside = (sx.x < 0 || sx.x > 1 || sx.y < 0 || sx.y > 1) ? 0 : 1;
 
-			float ay = sn_inside * step(wsn / 2, dyn) * step(yn, d);
+			float ay = sn_inside * step(wsn, dyn) * step(yn, d) * (dn / dyn);
 			weight += ay;
 			sum += textureLod(color_sampler, sn, 0.0) * ay;
 
+//			ay = sx_inside * step(wsx, dyx) * step(dy, d) * step(ay, 0);
+//			weight += ay;
+//			sum += textureLod(color_sampler, sx, 0.0) * ay;
+
 			float nai_ay = sx_inside * step(d, dy);
 			nai_weight += nai_ay;
-			nai_sum += textureLod(color_sampler, sx, 0.0) * nai_ay;
+			nai_sum += textureLod(color_sampler, sx, dyx) * nai_ay;
 		}
 	}
 

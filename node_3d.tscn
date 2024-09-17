@@ -40,7 +40,7 @@ needs_motion_vectors = false
 needs_normal_roughness = false
 script = ExtResource("6_dobmu")
 pre_blur_processor_stage = ExtResource("5_b2l2e")
-debug = false
+debug = true
 
 [sub_resource type="CompositorEffect" id="CompositorEffect_7i2rg"]
 resource_local_to_scene = false
@@ -62,8 +62,8 @@ maximum_jitter_value = 0.95
 minimum_user_threshold = 1.5
 focal_distance = 10.0
 focal_amount = 2.0
-max_focal_amount = 20.0
-debug = false
+max_focal_amount = 30.0
+debug = true
 
 [sub_resource type="CompositorEffect" id="CompositorEffect_bt7dm"]
 resource_local_to_scene = false

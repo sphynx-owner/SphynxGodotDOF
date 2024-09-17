@@ -10,9 +10,13 @@ config_version=5
 
 [application]
 
-config/name="EnhancedCompositorEffect"
+config/name="SphynxDepthOfField"
 config/features=PackedStringArray("4.3", "Forward Plus")
 config/icon="res://icon.svg"
+
+[display]
+
+window/size/mode=3
 
 [editor_plugins]
 
